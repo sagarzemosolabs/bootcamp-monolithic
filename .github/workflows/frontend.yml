@@ -1,4 +1,4 @@
-name: Build
+name: Frontend
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ jobs:
 
       - name: build project
         run: |
-          cd backend
+          cd frontend
           npm install
           npm test -- --watchAll=false
 
