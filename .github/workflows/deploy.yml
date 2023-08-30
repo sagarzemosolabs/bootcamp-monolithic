@@ -20,6 +20,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
 
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/private_key ${USER_NAME}@${HOSTNAME} '
+              docker-compose down
 
               # Now we have got the access of EC2 and we will start the deploy .
               docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-frontend:latest))
