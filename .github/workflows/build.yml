@@ -1,0 +1,46 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build: 
+    name: Build all three docker images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: docker-image
+
+      - name: Run test scripts
+        run: |
+          cd frontend
+          npm install
+          npm test -- --watchAll=false
+
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: ${{ vars.REGISTRY }} 
+      #     username: sagarzemosolabs
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v4
+      #   with:
+      #     images: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}
+      #     tags: |
+      #       type=ref,event=branch
+      #       type=ref,event=pr
+      #       type=semver,pattern={{version}}
+      #       type=semver,pattern={{major}}.{{minor}}
+        
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }},${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}:latest
+      #     labels: ${{ steps.meta.outputs.labels }}
+

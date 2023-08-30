@@ -1,0 +1,32 @@
+services:
+  frontend:
+    image: ghcr.io/sagarzemosolabs/greencommute-frontend
+    ports:
+      - 8080:8080
+    depends_on:
+      - backend
+    networks:
+      - green
+
+  backend:
+    image: ghcr.io/sagarzemosolabs/greencommute-backend
+    ports:
+      - 8000:8000
+    networks:
+      - green
+    depends_on:
+      - db
+
+  db:
+    image: ghcr.io/sagarzemosolabs/mysql-custom
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - green
+    ports:
+      - 3306:3306
+
+networks:
+  green:
