@@ -18,12 +18,12 @@ jobs:
           npm install
           npm test -- --watchAll=false
 
-      # - name: Log in to the Container registry
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: ${{ vars.REGISTRY }} 
-      #     username: sagarzemosolabs
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.REGISTRY }} 
+          username: sagarzemosolabs
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Extract metadata (tags, labels) for Docker
       #   id: meta
