@@ -15,7 +15,6 @@ jobs:
             USER_NAME: ${{secrets.USER_NAME}}
       
         run: |
-          cd
           mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
           echo -e "$PRIVATE_KEY" > ~/.ssh/private_key && chmod 600 ~/.ssh/private_key
           scp -o StrictHostKeyChecking=no -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
