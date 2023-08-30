@@ -16,9 +16,6 @@ jobs:
       
         run: |
           cd
-          mkdir -p ~/.ssh
-          echo "user ${USER_NAME}"
-          echo "host ${HOSTNAME}"
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
           echo -e "$PRIVATE_KEY" > ~/.ssh/private_key && chmod 600 ~/.ssh/private_key
-          cat ~/.ssh/private_key
-          scp -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
