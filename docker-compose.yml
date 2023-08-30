@@ -18,7 +18,7 @@ services:
       - db
 
   db:
-    image: ghcr.io/sagarzemosolabs/mysql-custom
+    image: ghcr.io/sagarzemosolabs/greencommute-db
     volumes:
       - ./db:/var/lib/mysql
     environment:

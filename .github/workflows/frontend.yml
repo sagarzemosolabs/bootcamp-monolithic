@@ -5,16 +5,16 @@ on:
       - master
 jobs:
   build: 
-    name: Build all three docker images
+    name: Build frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           ref: master
 
-      - name: Run test scripts
+      - name: build project
         run: |
-          cd frontend
+          cd backend
           npm install
           npm test -- --watchAll=false
 
@@ -26,7 +26,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        id: meta_frontend
+        id: meta
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/sagarzemosolabs/greencommute-frontend
@@ -41,6 +41,6 @@ jobs:
         with:
           context: frontend/
           push: true
-          tags: ${{ steps.meta_frontend.outputs.tags }},ghcr.io/sagarzemosolabs/greencommute-frontend:latest
-          labels: ${{ steps.meta_frontend.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/sagarzemosolabs/greencommute-frontend:latest
+          labels: ${{ steps.meta.outputs.labels }}
 
