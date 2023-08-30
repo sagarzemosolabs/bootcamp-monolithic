@@ -1,0 +1,34 @@
+name: Build
+on:
+  workflow_dispatch:
+jobs:
+  build: 
+    name: Build docker image 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+      - env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{secrets.SSH_HOST}}
+            USER_NAME: ${{secrets.USER_NAME}}
+      
+        run: |
+          cd
+          mkdir -p ~/.ssh
+          echo -e "$PRIVATE_KEY" > ~/.ssh/private_key && chmod 600 ~/.ssh/private_key
+          scp -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/private_key ${USER_NAME}@${HOSTNAME} '
+
+              # Now we have got the access of EC2 and we will start the deploy .
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-frontend:latest))
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-backend:latest))
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-db:latest))
+
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/blinkistap:greencommute-frontend' -a -q)
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/blinkistap:greencommute-backend' -a -q)
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/blinkistap:greencommute-db' -a -q)
+
+              docker-compose up
+              '
