@@ -16,6 +16,10 @@ services:
       - green
     depends_on:
       - db
+    environment:
+      - MYSQL_URL=##MYSQL_URL##
+      - MYSQL_USERNAME=##MYSQL_USERNAME##
+      - MYSQL_URL=##MYSQL_PASSWORD##
 
   db:
     image: ghcr.io/sagarzemosolabs/greencommute-db

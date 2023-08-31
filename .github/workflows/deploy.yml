@@ -9,6 +9,24 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: master
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_URL##"
+          replace: ${{ secrets.MYSQL_URL}}
+          regex: false
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_USERNAME##"
+          replace: ${{ secrets.MYSQL_USERNAME}}
+          regex: false
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_PASSWORD##"
+          replace: ${{ secrets.MYSQL_PASSWORD}}
+          regex: false
       - env:
             PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
             HOSTNAME: ${{secrets.SSH_HOST}}
