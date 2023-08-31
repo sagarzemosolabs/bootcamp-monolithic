@@ -19,7 +19,7 @@ services:
     environment:
       - MYSQL_URL=##MYSQL_URL##
       - MYSQL_USERNAME=##MYSQL_USERNAME##
-      - MYSQL_URL=##MYSQL_PASSWORD##
+      - MYSQL_PASSWORD=##MYSQL_PASSWORD##
 
   db:
     image: ghcr.io/sagarzemosolabs/greencommute-db
