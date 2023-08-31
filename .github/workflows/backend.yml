@@ -41,7 +41,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }},ghcr.io/sagarzemosolabs/greencommute-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
-            "MYSQL_URL =${{ secrets.MYSQL_URL }}"
+            "MYSQL_URL=${{ secrets.MYSQL_URL }}"
             "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}"
             "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}"
 
