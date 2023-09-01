@@ -91,10 +91,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run the build
-        run: |
-          echo "Deploying"
+      - name: Deploy containers
+        uses: sagarzemosolabs/bootcamp-monolithic/.github/deploy.yml@main
 
