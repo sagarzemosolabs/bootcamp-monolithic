@@ -47,6 +47,8 @@ jobs:
 
   check_backend_directory_changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.directory_changed.outputs.backend_changed }}
     
     steps: 
       - name: Checkout code
@@ -59,10 +61,14 @@ jobs:
         run: |
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^backend/'; then
             echo "Directory has changed"
-            echo "::set-output name=backend_changed::true"
+            backend_changed="true"
+            echo "Output [$backend_changed]"
+            echo "backend_changed=$backend_changed" >> $GITHUB_OUTPUT
           else
             echo "Directory has not changed"
-            echo "::set-output name=backend_changed::false"
+            backend_changed="false"
+            echo "Output [$backend_changed]"
+            echo "frontend_changed=$backend_changed" >> $GITHUB_OUTPUT
           fi
 
   backend_build:
