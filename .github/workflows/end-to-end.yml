@@ -37,13 +37,41 @@ jobs:
     if: ${{ needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' }}
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          ref: master
 
-      - name: Run the build
+      - name: build project
         run: |
-          echo "Building frontend"
-          echo ${{ needs.check_frontend_directory_changes.outputs.frontend_changed }}
+          cd frontend
+          npm install
+          npm test -- --watchAll=false
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.REGISTRY }} 
+          username: sagarzemosolabs
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/sagarzemosolabs/greencommute-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+        
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: frontend/
+          push: true
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/sagarzemosolabs/greencommute-frontend:latest
+          labels: ${{ steps.meta.outputs.labels }}
 
   check_backend_directory_changes:
     runs-on: ubuntu-latest
@@ -77,17 +105,94 @@ jobs:
     if: ${{ needs.check_backend_directory_changes.outputs.backend_changed == 'true' }}
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          ref: master
 
-      - name: Run the build
+      - name: Run test scripts
         run: |
-          echo "Building backend"
-          sleep 30
+          cd backend
+          mvn -DskipTests=true  package
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.REGISTRY }} 
+          username: sagarzemosolabs
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/sagarzemosolabs/greencommute-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+        
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/
+          push: true
+          tags: ${{ steps.meta.outputs.tags }},ghcr.io/sagarzemosolabs/greencommute-backend:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          secrets: |
+            "MYSQL_URL=${{ secrets.MYSQL_URL }}"
+            "MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }}"
+            "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}"
 
   deploy:
     needs:  [ frontend_build,  backend_build]
     if: ${{ always() && (needs.check_backend_directory_changes.outputs.backend_changed == 'true' ||  needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' )}}
     runs-on: ubuntu-latest
-    uses: ./.github/workflows/deploy.yml
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_URL##"
+          replace: ${{ secrets.MYSQL_URL}}
+          regex: false
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_USERNAME##"
+          replace: ${{ secrets.MYSQL_USERNAME}}
+          regex: false
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "##MYSQL_PASSWORD##"
+          replace: ${{ secrets.MYSQL_PASSWORD}}
+          regex: false
+      - env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{secrets.SSH_HOST}}
+            USER_NAME: ${{secrets.USER_NAME}}
+      
+        run: |
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+          echo -e "$PRIVATE_KEY" > ~/.ssh/private_key && chmod 600 ~/.ssh/private_key
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/private_key docker-compose.yml ${USER_NAME}@${HOSTNAME}:.
+
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/private_key ${USER_NAME}@${HOSTNAME} '
+              docker-compose down
+
+              # Now we have got the access of EC2 and we will start the deploy .
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-frontend:latest))
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-backend:latest))
+              docker rm $(docker stop $(docker ps -q --filter ancestor=ghcr.io/sagarzemosolabs/greencommute-db:latest))
+
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/greencommute-frontend' -a -q)
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/greencommute-backend' -a -q)
+              docker rmi -f $(docker images 'ghcr.io/sagarzemosolabs/greencommute-db' -a -q)
+
+              docker-compose up -d
+              '
 
