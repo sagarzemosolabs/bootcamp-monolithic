@@ -83,6 +83,7 @@ jobs:
       - name: Run the build
         run: |
           echo "Building backend"
+          sleep 30
 
   deploy:
     needs:  [ frontend_build,  backend_build]
