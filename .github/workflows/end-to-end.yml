@@ -86,7 +86,6 @@ jobs:
 
   deploy:
     needs:  [ frontend_build,  backend_build]
-    if: ${{ needs.check_backend_directory_changes.outputs.backend_changed == 'true' ||  needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -96,4 +95,5 @@ jobs:
       - name: Run the build
         run: |
           echo "Deploying"
+          echo ${{ needs.check_backend_directory_changes.outputs.backend_changed == 'true' ||  needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' }}
 
