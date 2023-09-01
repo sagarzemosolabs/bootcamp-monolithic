@@ -89,11 +89,5 @@ jobs:
     needs:  [ frontend_build,  backend_build]
     if: ${{ always() && (needs.check_backend_directory_changes.outputs.backend_changed == 'true' ||  needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' )}}
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Deploy containers
-        uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy.yml
 
