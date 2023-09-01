@@ -92,5 +92,5 @@ jobs:
 
     steps:
       - name: Deploy containers
-        uses: sagarzemosolabs/bootcamp-monolithic/.github/deploy.yml@main
+        uses: sagarzemosolabs/bootcamp-monolithic/.github/deploy.yml
 
