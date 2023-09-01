@@ -37,7 +37,7 @@ jobs:
       - name: Run the build
         run: |
           echo "Building frontend"
-          echo ${{ needs.check_frontend_directory_changes.outputs }}
+          echo ${{ needs.check_frontend_directory_changes.outputs.frontend_changed }}
 
   check_backend_directory_changes:
     runs-on: ubuntu-latest
