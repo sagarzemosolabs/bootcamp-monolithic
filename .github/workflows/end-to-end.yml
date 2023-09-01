@@ -29,7 +29,6 @@ jobs:
   frontend_build:
     needs: check_frontend_directory_changes
     runs-on: ubuntu-latest
-    if: ${{ needs.check_frontend_directory_changes.outputs.frontend_changed == 'true' }}
     
     steps:
       - name: Checkout code
@@ -38,6 +37,7 @@ jobs:
       - name: Run the build
         run: |
           echo "Building frontend"
+          echo ${{ needs.check_backend_directory_changes.outputs.frontend_changed }}
 
   check_backend_directory_changes:
     runs-on: ubuntu-latest
