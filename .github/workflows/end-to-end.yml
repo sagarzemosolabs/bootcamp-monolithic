@@ -8,7 +8,8 @@ on:
 jobs:
   check_frontend_directory_changes:
     runs-on: ubuntu-latest
-    
+    outputs:
+      frontend_changed: ${{ steps.directory_changed.outputs.frontend_changed }}
     steps: 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -20,10 +21,14 @@ jobs:
         run: |
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^frontend/'; then
             echo "Directory has changed"
-            echo "::set-output name=frontend_changed::true"
+            frontend_changed="true"
+            echo "Output [$frontend_changed]"
+            echo "frontend_changed=$frontend_changed" >> $GITHUB_OUTPUT
           else
             echo "Directory has not changed"
-            echo "::set-output name=frontend_changed::false"
+            frontend_changed="false"
+            echo "Output [$frontend_changed]"
+            echo "frontend_changed=$frontend_changed" >> $GITHUB_OUTPUT
           fi
 
   frontend_build:
